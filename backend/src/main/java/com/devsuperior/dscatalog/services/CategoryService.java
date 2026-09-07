@@ -21,4 +21,11 @@ public class CategoryService {
         List<Category> list = repository.findAll();
         return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public CategoryDTO findById(Long id) {
+        Category entity = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        return new CategoryDTO(entity);
+    }
 }
