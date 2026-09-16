@@ -6,6 +6,7 @@ import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.exceptions.DatabaseException;
 import com.devsuperior.dscatalog.exceptions.ResourceNotFoundException;
+import com.devsuperior.dscatalog.projections.ProductProjection;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,6 +17,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ProductService {
@@ -72,6 +78,18 @@ public class ProductService {
         catch (DataIntegrityViolationException e) {
             throw new DatabaseException("Falha de integridade referencial");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductProjection> findAllPaged(String name, String categoryId, Pageable pageable) {
+
+        List<Long> categoryIds = Arrays.asList();
+
+        if (!"0".equals(categoryId)) {
+            categoryIds = Arrays.asList(categoryId.split(",")).stream().map(Long::parseLong).toList();
+        }
+
+        return repository.searchProducts(categoryIds, name, pageable);
     }
 
     private void copyDtoToEntity(ProductDTO dto, Product entity) {
