@@ -1,6 +1,7 @@
 package com.devsuperior.dscatalog.resources.exceptions;
 
 import com.devsuperior.dscatalog.exceptions.DatabaseException;
+import com.devsuperior.dscatalog.exceptions.EmailException;
 import com.devsuperior.dscatalog.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -28,12 +29,24 @@ public class ResourceExceptionHandler {
     }
 
     @ExceptionHandler(DatabaseException.class)
-    public ResponseEntity<StandardError> entityNotFound(DatabaseException ex, HttpServletRequest request) {
+    public ResponseEntity<StandardError> database(DatabaseException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         StandardError err = new StandardError();
         err.setTimestamp(Instant.now());
         err.setStatus(status.value());
         err.setError("Database exception");
+        err.setMessage(ex.getMessage());
+        err.setPath(request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<StandardError> email(EmailException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandardError err = new StandardError();
+        err.setTimestamp(Instant.now());
+        err.setStatus(status.value());
+        err.setError("Email exception");
         err.setMessage(ex.getMessage());
         err.setPath(request.getRequestURI());
         return ResponseEntity.status(status).body(err);
